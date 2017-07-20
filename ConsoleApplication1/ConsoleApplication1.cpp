@@ -51,7 +51,7 @@
 #include "opencv2/imgproc/imgproc.hpp"  
 
 #include <iostream>  
-
+#include <vector>  
 #include "ComputeTime.h"  
 #include "windows.h"  
 
@@ -192,9 +192,20 @@ void GCApplication::showImage() const
 		for (int i = 0; i<ddd.rows * ddd.cols; i++)
 		{
 			// 将所有的黑色点变透明，会把抠出来的图中黑色变透明，需要优化，判断该点是背景还是前景
+			// 参考：http://blog.csdn.net/ksearch/article/details/20933881
+			// fgdPxls  前景像素集合
+			// prFgdPxls 可能是前景的像素集合
 			//(uchar)ddd.at<Vec4b>(i / ddd.cols, i%ddd.cols)[0] = 0;
 			//(uchar)ddd.at<Vec4b>(i / ddd.cols, i%ddd.cols)[1] = 0;
 			//(uchar)ddd.at<Vec4b>(i / ddd.cols, i%ddd.cols)[2] = 0;
+			Point cur(i / ddd.cols, i%ddd.cols);
+			vector<Point>::const_iterator fg = find(fgdPxls.begin(), fgdPxls.end(), cur);
+			vector<Point>::const_iterator prFg = find(prFgdPxls.begin(), prFgdPxls.end(), cur);
+			if( (fg != fgdPxls.end())
+				&& (prFg != prFgdPxls.end()) ){
+				// 如果在前景范围内不处理
+				continue;
+			}
 			if (((uchar)ddd.at<Vec4b>(i / ddd.cols, i%ddd.cols)[0] == 0)
 				&& ((uchar)ddd.at<Vec4b>(i / ddd.cols, i%ddd.cols)[1] == 0)
 				&& ((uchar)ddd.at<Vec4b>(i / ddd.cols, i%ddd.cols)[2]) == 0)
