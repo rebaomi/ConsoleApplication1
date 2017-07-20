@@ -185,8 +185,27 @@ void GCApplication::showImage() const
 
 	/*画矩形*/
 	if (rectState == IN_PROCESS || rectState == SET)
-		rectangle(res, Point(rect.x, rect.y), Point(rect.x + rect.width, rect.y + rect.height), GREEN, 2);
+	{
+		Mat ddd;
+		//res.copyTo(ddd);
+		cvtColor(res, ddd, CV_RGB2RGBA);
+		for (int i = 0; i<ddd.rows * ddd.cols; i++)
+		{
+			//(uchar)ddd.at<Vec4b>(i / ddd.cols, i%ddd.cols)[0] = 0;
+			//(uchar)ddd.at<Vec4b>(i / ddd.cols, i%ddd.cols)[1] = 0;
+			//(uchar)ddd.at<Vec4b>(i / ddd.cols, i%ddd.cols)[2] = 0;
+			if (((uchar)ddd.at<Vec4b>(i / ddd.cols, i%ddd.cols)[0] == 0)
+				&& ((uchar)ddd.at<Vec4b>(i / ddd.cols, i%ddd.cols)[1] == 0)
+				&& ((uchar)ddd.at<Vec4b>(i / ddd.cols, i%ddd.cols)[2]) == 0)
+			{
+				(uchar)ddd.at<Vec4b>(i / ddd.cols, i%ddd.cols)[3] = 0;
+			}
+		}
 
+		imwrite("result-1.png", ddd);
+		rectangle(res, Point(rect.x, rect.y), Point(rect.x + rect.width, rect.y + rect.height), GREEN, 2);
+	}
+		
 	imshow(*winName, res);
 }
 
@@ -331,7 +350,6 @@ int GCApplication::nextIter()
 		//使用grab算法进行一次迭代，参数2为mask，里面存的mask位是：矩形内部除掉那些可能是背景或者已经确定是背景后的所有的点，且mask同时也为输出  
 		//保存的是分割后的前景图像  
 		grabCut(*image, mask, rect, bgdModel, fgdModel, 1);
-		setAlphaMat(mask);
 	}
 	else
 	{
@@ -341,12 +359,10 @@ int GCApplication::nextIter()
 		if (lblsState == SET || prLblsState == SET)
 		{
 			grabCut(*image, mask, rect, bgdModel, fgdModel, 1, GC_INIT_WITH_MASK);
-			setAlphaMat(mask);
 		}
 		else
 		{
 			grabCut(*image, mask, rect, bgdModel, fgdModel, 1, GC_INIT_WITH_RECT);
-			setAlphaMat(mask);
 		}
 
 		isInitialized = true;
@@ -414,7 +430,7 @@ void Sharpen2(const Mat& myImage, Mat& Result)
 }
 
 
-int main_grab(int argc, char** argv)
+int main(int argc, char** argv)
 {
 	string filename;
 	cout << " Grabcuts ! \n";
@@ -509,9 +525,9 @@ exit_main:
 int main_channels() {
 	Mat image = imread("seg_result2.png");
 	Mat imgGRAY, imgRGBA, imgRGB555;
-	cvtColor(image, imgGRAY, CV_RGB2GRAY);
+	cvtColor(image, imgGRAY, CV_RGB2GRAY);// 将rgb转换成灰度图像
 	cvtColor(image, imgRGBA, CV_RGB2RGBA); // 将rgb转换成rgba
-	cvtColor(image, imgRGB555, CV_RGB2BGR555);
+	cvtColor(image, imgRGB555, CV_RGB2BGR555);// 不懂这个rgb555是什么鬼
 
 	int n = image.channels();
 	int nRGBA = imgRGBA.channels();

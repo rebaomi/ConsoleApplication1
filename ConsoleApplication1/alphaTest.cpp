@@ -98,7 +98,7 @@ void detectAndDisplay(Mat frame)
 	imshow(window_name, frame);
 }
 
-int main(void)
+int main_test(void)
 {
 	Mat frame;
 
@@ -116,4 +116,5 @@ int main(void)
 	//          int c = waitKey(10);
 	//          if( (char)c == 'c' ) { break; }
 	waitKey(0);
+	return 0;
 }
