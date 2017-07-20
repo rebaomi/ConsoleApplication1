@@ -32,7 +32,6 @@ void mapToMat(const cv::Mat &srcAlpha, cv::Mat &dest, int x, int y)
 			
 			alpha = srcAlpha.ptr<uchar>(j)[i / 3 * 4 + 3];
 			//alpha = 255-alpha;
-			cout << alpha << endl;
 			if (alpha != 0) //4Í¨µÀÍ¼ÏñµÄalphaÅÐ¶Ï
 			{
 				for (int k = 0; k < 3; k++)
