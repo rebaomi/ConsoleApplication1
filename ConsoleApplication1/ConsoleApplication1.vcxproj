@@ -158,6 +158,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="alphaTest.cpp" />
     <ClCompile Include="ConsoleApplication1.cpp" />
     <ClCompile Include="createAlphaMat.cpp" />
     <ClCompile Include="graph.cpp" />

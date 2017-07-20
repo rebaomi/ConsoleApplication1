@@ -47,9 +47,6 @@
 
 #include "stdafx.h"  
 
-
-
-
 #include "opencv2/highgui/highgui.hpp"  
 #include "opencv2/imgproc/imgproc.hpp"  
 
@@ -513,7 +510,7 @@ int main_channels() {
 	Mat image = imread("seg_result2.png");
 	Mat imgGRAY, imgRGBA, imgRGB555;
 	cvtColor(image, imgGRAY, CV_RGB2GRAY);
-	cvtColor(image, imgRGBA, CV_RGB2RGBA);
+	cvtColor(image, imgRGBA, CV_RGB2RGBA); // ½«rgb×ª»»³Érgba
 	cvtColor(image, imgRGB555, CV_RGB2BGR555);
 
 	int n = image.channels();
