@@ -191,6 +191,7 @@ void GCApplication::showImage() const
 		cvtColor(res, ddd, CV_RGB2RGBA);
 		for (int i = 0; i<ddd.rows * ddd.cols; i++)
 		{
+			// 将所有的黑色点变透明，会把抠出来的图中黑色变透明，需要优化，判断该点是背景还是前景
 			//(uchar)ddd.at<Vec4b>(i / ddd.cols, i%ddd.cols)[0] = 0;
 			//(uchar)ddd.at<Vec4b>(i / ddd.cols, i%ddd.cols)[1] = 0;
 			//(uchar)ddd.at<Vec4b>(i / ddd.cols, i%ddd.cols)[2] = 0;
@@ -438,20 +439,20 @@ int main(int argc, char** argv)
 	cin >> filename;
 
 
-	Mat ori = imread(filename, 1);
-
-	vector<Mat> rgb_planes;
-	split(ori, rgb_planes);
-	equalizeHist(rgb_planes[0], rgb_planes[0]);
-	equalizeHist(rgb_planes[1], rgb_planes[1]);
-	equalizeHist(rgb_planes[2], rgb_planes[2]);
+	Mat image = imread(filename, 1);
 
 	// 直方图优化
-	Mat image_hist;
-	merge(rgb_planes, image_hist);
+	// vector<Mat> rgb_planes;
+	// split(image, rgb_planes);
+	// equalizeHist(rgb_planes[0], rgb_planes[0]);
+	// equalizeHist(rgb_planes[1], rgb_planes[1]);
+	// equalizeHist(rgb_planes[2], rgb_planes[2]);
+
+	// Mat image_hist;
+	// merge(rgb_planes, image_hist);
 	// 锐化
-	Mat image;
-	Sharpen2(ori, image);
+	// Mat image;
+	// Sharpen2(ori, image);
 
 	if (image.empty())
 	{
