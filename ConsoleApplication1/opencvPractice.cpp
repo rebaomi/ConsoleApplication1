@@ -232,6 +232,8 @@ int main_opencv(int argc, char* argv[]) {
 }
 
 // 魔棒工具 floodfill
+// 参考：http://blog.csdn.net/xiaowei_cqu/article/details/8987387
+// 参考：http://blog.csdn.net/poem_qianmo/article/details/28261997
 
 static void floodfill_help() 
 {
@@ -251,33 +253,42 @@ static void floodfill_help()
 		"\t8 - use 8-connectivity mode\n" << endl;
 }
 
-Mat image0, image, gray, mask;
-int ffillMode = 1;
-int loDiff = 20, upDiff = 20;
-int connectivity = 4;
-int isColor = true;
-bool useMask = false;
-int newMaskVal = 255;
+// 全局变量声明
+Mat image0, image, gray, mask;// 定义原始图、目标图、灰度图、掩模图 
+int ffillMode = 1;//漫水填充的模式
+int loDiff = 20, upDiff = 20;//负差最大值、正差最大值
+int connectivity = 4;//表示floodFill函数标识符低八位的连通值  
+int isColor = true;//是否为彩色图的标识符布尔值  
+bool useMask = false;//是否显示掩膜窗口的布尔值  
+int newMaskVal = 255;//新的重新绘制的像素值  
 
+//      描述：鼠标消息onMouse回调函数  
 static void onMouse(int event, int x, int y, int, void*)
 {
+	// 若鼠标左键没有按下，便返回
 	if (event != CV_EVENT_LBUTTONDOWN)
 		return;
-
+	//-------------------【<1>调用floodFill函数之前的参数准备部分】---------------  
 	Point seed = Point(x, y);
-	int lo = ffillMode == 0 ? 0 : loDiff;
-	int up = ffillMode == 0 ? 0 : upDiff;
+	int lo = ffillMode == 0 ? 0 : loDiff;//空范围的漫水填充，此值设为0，否则设为全局的g_nLowDifference  
+	int up = ffillMode == 0 ? 0 : upDiff;//空范围的漫水填充，此值设为0，否则设为全局的g_nUpDifference
 	int flags = connectivity + (newMaskVal << 8) +
+		//标识符的0~7位为g_nConnectivity，8~15位为g_nNewMaskVal左移8位的值，16~23位为CV_FLOODFILL_FIXED_RANGE或者0。
 		(ffillMode == 1 ? CV_FLOODFILL_FIXED_RANGE : 0);
-	int b = (unsigned)theRNG() & 255;
-	int g = (unsigned)theRNG() & 255;
-	int r = (unsigned)theRNG() & 255;
-	Rect ccomp;
-
+	//随机生成bgr值
+	int b = (unsigned)theRNG() & 255;//随机返回一个0~255之间的值
+	int g = (unsigned)theRNG() & 255;//随机返回一个0~255之间的值
+	int r = (unsigned)theRNG() & 255;//随机返回一个0~255之间的值
+	
+	Rect ccomp;//定义重绘区域的最小边界矩形区域  
+    
+    //在重绘区域像素的新值，若是彩色图模式，取Scalar(b, g, r)；若是灰度图模式，取Scalar(r*0.299 + g*0.587 + b*0.114)  
 	Scalar newVal = isColor ? Scalar(b, g, r) : Scalar(r*0.299 + g*0.587 + b*0.114);
-	Mat dst = isColor ? image : gray;
+	newVal = Scalar(255, 255, 255);
+	Mat dst = isColor ? image : gray;//目标图的赋值 
 	int area;
 
+	//--------------------【<2>正式调用floodFill函数】----------------------------- 
 	if (useMask)
 	{
 		threshold(mask, mask, 1, 128, CV_THRESH_BINARY);
@@ -292,47 +303,69 @@ static void onMouse(int event, int x, int y, int, void*)
 	}
 
 	imshow("image", dst);
+	imwrite("ddd.png", dst);
+
+	// Mat alphaDst;
+	// cvtColor(dst, alphaDst, CV_RGB2RGBA);	
+	// imwrite("alphaDst.png", alphaDst);
 	cout << area << " pixels were repainted\n";
 }
 
-
+//-----------------------------------【main( )函数】--------------------------------------------    
+//      描述：控制台应用程序的入口函数，我们的程序从这里开始    
+//-----------------------------------------------------------------------------------------------    
 int main()
 {
-	char* filename = "2.jpg";
+	//改变console字体颜色    
+	//system("color 2F");
+
+	//载入原图  
+	char* filename = "10.jpg";
 	image0 = imread(filename, 1);
+	// image0 = imread(filename, -1);// imread后一个参数为-1表示读取带有alpha通道的图片
 
 	if (image0.empty())
 	{
 		cout << "Image empty. Usage: ffilldemo <image_name>\n";
 		return 0;
 	}
+	//显示帮助文字 
 	floodfill_help();
-	image0.copyTo(image);
-	cvtColor(image0, gray, CV_BGR2GRAY);
-	mask.create(image0.rows + 2, image0.cols + 2, CV_8UC1);
 
-	namedWindow("image", 0);
-	createTrackbar("lo_diff", "image", &loDiff, 255, 0);
-	createTrackbar("up_diff", "image", &upDiff, 255, 0);
+	image0.copyTo(image);//拷贝源图到目标图
+	cvtColor(image0, gray, CV_BGR2GRAY);//转换三通道的image0到灰度图  
+	mask.create(image0.rows + 2, image0.cols + 2, CV_8UC1);//利用image0的尺寸来初始化掩膜mask  
 
+	namedWindow("image", 0);// 效果图
+	// namedWindow( "效果图",CV_WINDOW_AUTOSIZE );  
+
+	//创建Trackbar  
+	createTrackbar("lo_diff", "image", &loDiff, 255, 0);// 负差最大值
+	createTrackbar("up_diff", "image", &upDiff, 255, 0);// 正差最大值
+
+    //鼠标回调函数
 	setMouseCallback("image", onMouse, 0);
 
+	//循环轮询按键
 	for (;;)
 	{
+		//先显示效果图 
 		imshow("image", isColor ? image : gray);
 
 		int c = waitKey(0);
+		//判断ESC是否按下，若按下便退出
 		if ((c & 255) == 27)
 		{
 			cout << "Exiting ...\n";
 			break;
 		}
+		//根据按键的不同，进行各种操作 
 		switch ((char)c)
 		{
 		case 'c':
 			if (isColor)
 			{
-				cout << "Grayscale mode is set\n";
+				cout << "Grayscale mode is set\n";// 切换彩色图/灰度图模式
 				cvtColor(image0, gray, CV_BGR2GRAY);
 				mask = Scalar::all(0);
 				isColor = false;
@@ -346,6 +379,7 @@ int main()
 			}
 			break;
 		case 'm':
+			// 显示/隐藏掩膜窗口
 			if (useMask)
 			{
 				destroyWindow("mask");
@@ -360,29 +394,29 @@ int main()
 			}
 			break;
 		case 'r':
-			cout << "Original image is restored\n";
+			cout << "Original image is restored\n";// 恢复原始图像
 			image0.copyTo(image);
 			cvtColor(image, gray, CV_BGR2GRAY);
 			mask = Scalar::all(0);
 			break;
 		case 's':
-			cout << "Simple floodfill mode is set\n";
+			cout << "Simple floodfill mode is set\n";// 使用空范围的漫水填充
 			ffillMode = 0;
 			break;
 		case 'f':
-			cout << "Fixed Range floodfill mode is set\n";
+			cout << "Fixed Range floodfill mode is set\n";// 使用渐变、固定范围的漫水填充
 			ffillMode = 1;
 			break;
 		case 'g':
-			cout << "Gradient (floating range) floodfill mode is set\n";
+			cout << "Gradient (floating range) floodfill mode is set\n";//  使用渐变、浮动范围的漫水填充
 			ffillMode = 2;
 			break;
 		case '4':
-			cout << "4-connectivity mode is set\n";
+			cout << "4-connectivity mode is set\n";// 操作标识符的低八位使用4位的连接模式
 			connectivity = 4;
 			break;
 		case '8':
-			cout << "8-connectivity mode is set\n";
+			cout << "8-connectivity mode is set\n";// 操作标志符的低八位使用8位的连接模式
 			connectivity = 8;
 			break;
 		}
@@ -390,3 +424,4 @@ int main()
 
 	return 0;
 }
+
