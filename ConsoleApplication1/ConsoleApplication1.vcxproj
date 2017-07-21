@@ -163,6 +163,7 @@
     <ClCompile Include="createAlphaMat.cpp" />
     <ClCompile Include="graph.cpp" />
     <ClCompile Include="opencvPractice.cpp" />
+    <ClCompile Include="operatePixel.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

@@ -417,7 +417,7 @@ void Sharpen2(const Mat& myImage, Mat& Result)
 	}
 
 	//边缘处理。边缘没有卷积，所以边缘赋值为原图像对应像素的值。
-
+	// 可以用于描边
 	//先处理上和下
 	uchar* output_top = Result.ptr<uchar>(0);
 	const uchar* origin_top = myImage.ptr<uchar>(0);
@@ -442,7 +442,7 @@ void Sharpen2(const Mat& myImage, Mat& Result)
 }
 
 
-int main(int argc, char** argv)
+int main_grab(int argc, char** argv)
 {
 	string filename;
 	cout << " Grabcuts ! \n";
