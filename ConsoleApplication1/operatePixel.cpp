@@ -10,6 +10,27 @@ using namespace cv;
 /*
  【OpenCV】访问Mat中每个像素的值（新）
   参考：http://blog.csdn.net/xiaowei_cqu/article/details/19839019
+
+  时间对比
+  通过迭代二十次取平均时间，得到每种方法是运算时间如下：
+  using .ptr and [] = 22.0437ms
+  using .ptr and * ++ = 20.168ms
+  using .ptr and * ++ and modulo = 20.0039ms
+  using .ptr and * ++ and bitwise = 10.236ms
+  using direct pointer arithmetic = 10.1062ms
+  using .ptr and * ++ and bitwise with img.cols * img.channels() = 123.648ms
+  using .ptr and * ++ and bitwise <continuous> = 10.4485ms
+  using .ptr and * ++ and bitwise <continuous+channels> = 9.28796ms
+  using Mat_ iterator = 674.741ms
+  using Mat_ iterator and bitwise = 663.554ms
+  using MatIterator_ = 911.159ms
+  using at = 1143.83ms
+  using input/output images = 11.0377ms
+  using overloaded operators = 8.69846ms
+
+  指针*++访问和位运算是最快的方法；而不断的计算image.cols*image.channles()花费了大量重复的时间；
+  另外迭代器访问虽然安全，但性能远低于指针运算；
+  通过图像坐标(j,i)访问时最慢的，使用重载操作符直接运算效率最高。
 */
 
 // 方法零：ptr和[]操作符
