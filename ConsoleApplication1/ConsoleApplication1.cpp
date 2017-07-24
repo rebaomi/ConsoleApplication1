@@ -441,7 +441,7 @@ void Sharpen2(const Mat& myImage, Mat& Result)
 	}
 }
 
-
+// grab cut main method
 int main_grab(int argc, char** argv)
 {
 	string filename;
