@@ -7,6 +7,8 @@
 using namespace std;
 
 // success，不知道如何构建trimap，或者草图
+// 文章1:http://blog.csdn.net/blueswhen/article/details/22617631?locationNum=10
+// 文章2:http://blog.csdn.net/blueswhen/article/details/23106825
 // 参考：https://github.com/np-csu/AlphaMatting
 int main_alphamatting()
 {
