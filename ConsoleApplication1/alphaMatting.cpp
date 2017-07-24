@@ -6,6 +6,8 @@
 
 using namespace std;
 
+// success，不知道如何构建trimap，或者草图
+// 参考：https://github.com/np-csu/AlphaMatting
 int main_alphamatting()
 {
 	char fileAddr[64] = { 0 };
