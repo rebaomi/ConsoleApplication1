@@ -19,6 +19,21 @@
     <Filter Include="Header Files\alphamatting">
       <UniqueIdentifier>{bc16b4b7-2c78-4a6e-9ec0-4473d291bd18}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\globalmatting">
+      <UniqueIdentifier>{15b5624e-80de-44a3-87f6-ff75f7ea98f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\globalmatting">
+      <UniqueIdentifier>{ab77419f-0033-4d97-96fb-23258d407d7e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\globalmatting\guidedFilter">
+      <UniqueIdentifier>{56fac1b6-1d93-4d27-a0a0-078ab0103dae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\alphaMatting\globalmatting">
+      <UniqueIdentifier>{b37cc40c-da73-4e2f-8166-0359e6626955}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\alphaMatting\globalmatting\guidedFilter">
+      <UniqueIdentifier>{ca3233af-fc4b-4d21-a3d8-d362195d8732}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -41,6 +56,15 @@
     </ClInclude>
     <ClInclude Include="sharedmatting.h">
       <Filter>Header Files\alphamatting</Filter>
+    </ClInclude>
+    <ClInclude Include="guidedfilter.h">
+      <Filter>Header Files\globalmatting\guidedFilter</Filter>
+    </ClInclude>
+    <ClInclude Include="globalmatting.h">
+      <Filter>Header Files\globalmatting</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -74,10 +98,21 @@
     <ClCompile Include="sharedmatting.cpp">
       <Filter>Source Files\alphaMatting</Filter>
     </ClCompile>
+    <ClCompile Include="guidedfilter.cpp">
+      <Filter>Source Files\alphaMatting\globalmatting\guidedFilter</Filter>
+    </ClCompile>
+    <ClCompile Include="globalmatting.cpp">
+      <Filter>Source Files\alphaMatting\globalmatting</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="instances.inc">
       <Filter>Source Files</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ConsoleApplication1.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>
