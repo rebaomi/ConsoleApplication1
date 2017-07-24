@@ -307,7 +307,7 @@ void colorReduce13(Mat &img, int div = 64)
 	img = (img&Scalar(mask, mask, mask)) + Scalar(div / 2, div / 2, div / 2);
 }
 
-int main()
+int main_operate()
 {
 	Mat m = imread("d:\\123.png", 1);
 	Mat result;
