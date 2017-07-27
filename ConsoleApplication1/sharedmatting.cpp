@@ -655,6 +655,66 @@ void SharedMatting::Sample(std::vector<vector<Point> > &F, std::vector<vector<Po
 	}
 }
 
+// 改进版Sample：http://blog.csdn.net/tommy_wxie/article/details/75088894
+/// <summary>
+///  对每个未知区域的像素按设定的循环角度搜索有效的前景和背景取样点
+/// </summary>
+/// <param name="X">未知区域的X坐标。</param>
+/// <param name="Y">未知区域的Y坐标。</param>
+/// <param name="F">用于保存前景点的内存区域。</param>
+/// <param name="B">用于保存背景点的内存区域。</param>
+/// <param name="CountF">最终获取的前景点的数量。</param>
+/// <param name="CountB">最终获取的背景点的数量。</param>
+///    <remarks>对于有些点，是有可能获取不到有效的点的。</remarks>
+/*
+void Sample(int X, int Y, Point *F, Point *B, int &CountF, int &CountB)
+{
+	int Z, XX, YY, Alpha;
+	bool F1, F2;
+	double InitAngle, IncAngle, Angle;
+	double Dx, Dy, Step, Value, XD, YD, StepX, StepY;
+	IncAngle = 360 / KG;                                                //    每次扫描增加的角度
+	InitAngle = (Y % 5 * 5 + X % 25) * IncAngle / 25;                        //  起始角度，范围在[0,IncAngle]之间，按照3*3的方式轮流替换，有利于提供结果的稳定性，如果KG取值较大，也可以使用4*4或者5*5
+	CountF = 0; CountB = 0;                                                //    起步时需要记为0，注意参数中的引用（&）
+	for (Z = 0; Z < KG; Z++)
+	{
+		F1 = false; F2 = false;                                            //    开始寻找，暂时未找到任何前景点和背景点
+		Angle = (InitAngle + Z * IncAngle) / 180.0f * 3.1415926f;        //    每次搜索的角度
+		Dx = cos(Angle);    Dy = sin(Angle);
+		Step = min(1.0f / (abs(Dx) + 1e-10), 1.0f / (abs(Dy) + 1e-10));
+		XD = X + 0.5;        YD = Y + 0.5;                                //    +0.5使用于int四舍五入取整，相当于其他语言的round函数
+		StepX = Step * Dx;    StepY = Step * Dy;                            //    StepX和StepY中必然有一个为1，另外一个小于1，这样保证每次搜索的像素点都会不同，一个好的建议是加大这个循环步长
+																			//    这样有两个好处。1：加快查找速度；2：让搜索点可以进入已知点的内部，从而避免了只从已知点的边缘取样。但如果已知点的区域狭长，可能丢失有效取样点。
+		for (; ;)
+		{
+			XX = int(XD);
+			if (XX < 0 || XX >= Width) break;                            //    已经超出了图像的边界了，结束循环
+			YY = int(YD);
+			if (YY < 0 || YY >= Height) break;
+			XD += StepX;    YD += StepY;
+			Alpha = Mask[YY * MaskStride + XX];                            //    得到路径中该点的特征值（前景/背景/未知)
+			if (F1 == false && Alpha == 0)                                //    如果沿这条路径尚未找到背景点，并且改点具有背景点的特征，则记录下改点到背景点序列中
+			{
+				B[CountB].X = XX;                                        //    背景点的X坐标
+				B[CountB].Y = YY;                                        //    背景点的Y坐标
+				CountB++;                                                //    背景点数量增加1
+				F1 = true;                                                //    在此路径已经找到了背景点，不用再找背景点了。
+			}
+			else if (F2 == false && Alpha == 255)                        //    如果沿这条路径尚未找到前景点，并且改点具有前景点的特征，则记录下改点到前景点序列中
+			{
+				F[CountF].X = XX;                                        //    前景点的X坐标
+				F[CountF].Y = YY;                                        //    前景点的X坐标
+				CountF++;                                                //    前景点数量增加1
+				F2 = true;                                                //    在此路径已经找到了前景点，不用再找前景点了。
+			}
+			else if (F1 == true && F2 == true)                            //    如果前景点和背景点都已经找到了，则结束循环
+			{
+				break;
+			}
+		}
+	}
+}*/
+
 void SharedMatting::gathering()
 {
 	vector<Point> f;
@@ -736,6 +796,67 @@ void SharedMatting::gathering()
 	b.clear();
 
 }
+
+// 改进版gathering
+// 参考：http://blog.csdn.net/tommy_wxie/article/details/75088894
+/*
+void Gathering()
+{
+int X, Y, K, L, Index, Speed;
+int CountF, CountB, Fx, Fy, Bx, By;
+double Pfp, Min, Dpf, Gp;
+bool Flag;
+Point *F = (Point *) malloc(KG * sizeof(Point));            //    采用这种方式占用的内存小很多
+Point *B = (Point *) malloc(KG * sizeof(Point));
+for (Y = 0; Y < Height; Y++)
+{
+Index = Y * MaskStride;
+for (X = 0; X < Width; X++)
+{
+tuple[Index].Flag = -1;                                //    先都设置为无效的点
+if (Mask[Index] != 0 && Mask[Index] != 255)            //    只处理未知点
+{
+Sample(X, Y, F, B, CountF, CountB);                //    对当前点进行前景和背景取样
+Pfp = CalcPFP(X, Y, F, B, CountF, CountB);        //  计算公式（5），因为公式（5）只于前景和背景取样点的整体有关，无需放到下面的循环内部
+Min = 1e100;
+Flag = false;
+for (K = 0; K < CountF; K++)                    //    对于每一个前景点
+{
+Dpf = CalcDp(X, Y, F[K].X, F[K].Y, true);    //    计算前景点到中心点的欧式距离
+for (L = 0; L < CountB; L++)                //    对于每一个背景点
+{
+Gp = CalcGp(X, Y, F[K].X, F[K].Y, B[L].X, B[L].Y, Pfp, Dpf);    //    按照公式（7）计算目标函数
+if (Gp < Min)
+{
+Min = Gp;
+Fx = F[K].X; Fy = F[K].Y;            //    记录下目标函数为最小值处的前景和背景点的坐标
+Bx = B[L].X; By = B[L].Y;
+Flag = true;
+}
+}
+}
+if (Flag == true)                                //    说明找到了最好的组合了，如果找不到,则原因可能是：（1）Sample过程为找到任何有效的前景和背景点；（2）Sample过程只找到前景点或只找到背景点
+{                                                //    某个点找不到也不用怕，可能在下面的Refine过程中（其算法为领域处理）得以弥补。
+Speed = Fy * Stride + Fx * 3;                //    记录下最佳前景点的颜色值
+tuple[Index].BF = ImageData[Speed];
+tuple[Index].GF = ImageData[Speed + 1];
+tuple[Index].RF = ImageData[Speed + 2];
+Speed = By * Stride + Bx * 3;
+tuple[Index].BB = ImageData[Speed];            //    记录下最佳背景点的颜色值
+tuple[Index].GB = ImageData[Speed + 1];
+tuple[Index].RB = ImageData[Speed + 2];
+tuple[Index].SigmaF = CaclSigma(Fx, Fy);    //    计算前景点周边像素的均方差值
+tuple[Index].SigmaB = CaclSigma(Bx, By);    //    计算背景点周边像素的均方差值
+tuple[Index].Flag = 1;                        //    这个像素是个有效的处理点
+}
+}
+Index++;
+}
+}
+free(F);
+free(B);
+}
+*/
 
 void SharedMatting::refineSample()
 {

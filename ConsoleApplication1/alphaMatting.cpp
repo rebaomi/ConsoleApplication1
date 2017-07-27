@@ -10,11 +10,11 @@ using namespace std;
 // ÎÄÕÂ1:http://blog.csdn.net/blueswhen/article/details/22617631?locationNum=10
 // ÎÄÕÂ2:http://blog.csdn.net/blueswhen/article/details/23106825
 // ²Î¿¼£ºhttps://github.com/np-csu/AlphaMatting
-int main_alphamatting()
+int main()
 {
 	char fileAddr[64] = { 0 };
 
-	for (int n = 1; n < 28; ++n) {
+	for (int n = 1; n < 2; ++n) {
 		SharedMatting sm;
 
 		//sprintf(fileAddr, "C:/Users/Chuangkit_Developer7/Desktop/input.png", n / 10, n % 10);
